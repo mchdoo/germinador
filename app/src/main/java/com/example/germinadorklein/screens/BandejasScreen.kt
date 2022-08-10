@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -50,9 +51,7 @@ fun ScreenBody(scaffoldPadding: PaddingValues, navController: NavController) {
     var dialogOpen by remember { mutableStateOf<Boolean>(false) }
 
     var selectedCell: String by rememberSaveable {mutableStateOf("1:1")}
-    var inactiveCells: MutableList<String> = remember { mutableStateListOf("1:1") }
-
-    var scrollState = rememberScrollState()
+    var inactiveCells: MutableList<String> = remember { mutableStateListOf("0") }
 
     var cells = HashMap<Char, HashMap<Int, Char>>()
     var cell = HashMap<Int, Char>()
@@ -67,40 +66,31 @@ fun ScreenBody(scaffoldPadding: PaddingValues, navController: NavController) {
         c++
     }
 
-    LazyColumn(contentPadding = PaddingValues(top = scaffoldPadding.calculateTopPadding(), start = SPACE, end = SPACE, bottom = SPACE), content = {
+    LazyHorizontalGrid(rows = GridCells.Fixed(16), contentPadding = PaddingValues(top = scaffoldPadding.calculateTopPadding(), start = SPACE, end = SPACE, bottom = SPACE), content = {
 
 
-        items (cells.values.size) { valueIndex->
+        items (150) { index ->
 
             var itemActivated by remember {mutableStateOf<Boolean>(true)}
             val bgColor = if (itemActivated) MaterialTheme.colorScheme.primary else Color.Transparent
             val borderWidth: Dp = if (itemActivated) 0.dp else 1.dp
             val textColor: Color = if (itemActivated) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
 
-
-            Row(modifier = Modifier.horizontalScroll(state = scrollState), content = {
-
-                repeat(cells.keys.size) { keyIndex ->
-
-                    val index = "${cells.keys.elementAt(valueIndex)}:${keyIndex}"
-
-                    fun clickCell(e: String) {
-                        if (itemActivated) {
-                            dialogOpen = true
-                            selectedCell = e
-                        }
-                        if (!itemActivated) {
-                            inactiveCells.remove(e)
-                        }
-                    }
-
-                    if (inactiveCells.contains(index)) {
-                        itemActivated = false
-                    }
-
-                    Cell(index = index, bgColor = bgColor, borderWidth = borderWidth, textColor = textColor, onClick = { clickCell(index) })
+            fun clickCell(e: String) {
+                if (itemActivated) {
+                    selectedCell = e
+                    dialogOpen = true
                 }
-            })
+                if (!itemActivated) {
+                    inactiveCells.remove(e)
+                }
+            }
+
+            if (inactiveCells.contains(index.toString())) {
+                itemActivated = false
+            }
+
+            Cell(index = index.toString(), bgColor = bgColor, borderWidth = borderWidth, textColor = textColor, onClick = { clickCell(index.toString()) })
 
         }
     })
